@@ -9,7 +9,6 @@ import {
   SECRETS,
   brew,
   chestLocked,
-  epilogue,
   type DialogContent,
 } from './content/texts';
 import { Engine, type EngineView } from './engine/engine';
@@ -20,16 +19,18 @@ import { Hotspots } from './ui/Hotspots';
 import { Hud } from './ui/Hud';
 import { BrewDialog, InventoryDialog, MapDialog, Toasts, iconForClue, iconForSecret, type Toast } from './ui/Panels';
 import { PixelIcon } from './ui/PixelIcon';
+import { TelescopeView } from './ui/TelescopeView';
 import { EXTERIOR_HOTSPOTS } from './world/exterior';
 import { ROOM_ORDER, SPACES, reducedSegments, tourSegments } from './world/tour';
 import type { RoomId } from './world/types';
 
 type Modal =
-  | { kind: 'content'; content: DialogContent; clue?: string; ending?: boolean }
+  | { kind: 'content'; content: DialogContent; clue?: string }
   | { kind: 'brew' }
   | { kind: 'map' }
   | { kind: 'inventory' }
   | { kind: 'reset' }
+  | { kind: 'telescope' }
   | null;
 
 type Speech = { id: string; text: string; key: number; title?: string };
@@ -193,12 +194,11 @@ export default function App() {
           } else setModal({ kind: 'content', content: chestLocked(found) });
           return;
         }
-        case 'ending': {
+        case 'ending':
           store.markDone(id);
-          const s = store.get();
-          setModal({ kind: 'content', content: epilogue(s.clues.length, s.secrets.length), ending: true });
+          setModal({ kind: 'telescope' });
+          audio.sfx('stars');
           return;
-        }
         case 'plaque':
           store.markDone(id);
           say({ id, title: action.title, text: action.text });
@@ -322,13 +322,6 @@ export default function App() {
           title={modal.content.title}
           kicker={modal.content.kicker}
           onClose={() => setModal(null)}
-          actions={
-            modal.ending ? (
-              <button type="button" className="btn" onClick={() => goTo('exterior')}>
-                Volver a explorar
-              </button>
-            ) : undefined
-          }
         >
           {modal.content.body.map((p) => (
             <p key={p}>{p}</p>
@@ -343,6 +336,15 @@ export default function App() {
         </Dialog>
       )}
       {modal?.kind === 'brew' && <BrewDialog onBrew={onBrew} onClose={() => setModal(null)} />}
+      {modal?.kind === 'telescope' && (
+        <TelescopeView
+          clues={save.clues.length}
+          secrets={save.secrets.length}
+          reduced={reduced}
+          onExplore={() => goTo('exterior')}
+          onClose={() => setModal(null)}
+        />
+      )}
       {modal?.kind === 'inventory' && <InventoryDialog save={save} onClose={() => setModal(null)} />}
       {modal?.kind === 'map' && (
         <MapDialog room={view.room} rooms={ROOM_ORDER} visited={save.visited} reduced={reduced} onGo={goTo} onClose={() => setModal(null)} />

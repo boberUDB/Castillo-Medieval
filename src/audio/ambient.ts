@@ -56,7 +56,7 @@ const MOODS: Record<RoomId, RoomMood> = {
   observatory: { wind: 0.7, drone: 0.4, choir: 0.5, density: 3, octave: 12, theme: 0.6, eerie: 0.3, fire: 0, darkness: 380 },
 };
 
-export type Sfx = 'tap' | 'clue' | 'secret' | 'open' | 'brew';
+export type Sfx = 'tap' | 'clue' | 'secret' | 'open' | 'brew' | 'stars';
 
 const BEAT = 0.95; // segundos por pulso: muy lento
 
@@ -489,6 +489,17 @@ export class Ambient {
       case 'brew':
         for (let i = 0; i < 7; i++) this.blub(t + i * 0.11 + Math.random() * 0.05);
         break;
+      case 'stars': {
+        // bajo las estrellas: el tema del rey, agudo y muy lento, con todos sus ecos
+        this.queue = [];
+        let at = t + 1.2;
+        for (const [n, d] of THEME) {
+          this.musicBox(n + 12, at, d * 1.1, 0.8);
+          at += d * 1.1;
+        }
+        this.nextPhrase = at + 10;
+        break;
+      }
       case 'open': {
         // el tema completo del rey, al fin
         this.queue = [];

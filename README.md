@@ -1,5 +1,7 @@
 # El Castillo de los Ecos
 
+Creado por **Roberto Miranda**.
+
 Una exploración nocturna en pixel art de un castillo medieval, recorrida con el scroll. La cámara cruza el puente levadizo, atraviesa el portón y sigue por puertas, escaleras y pasadizos reales hasta lo alto de la torre del observatorio. Por el camino hay tres ecos que abren el cofre del rey y tres secretos opcionales.
 
 ## Cómo ejecutarlo
@@ -27,7 +29,7 @@ pnpm lint       # ESLint
 | Salón del trono | El trono vacío invoca al fantasma del rey (**tercer eco**) | Vitral, estandarte, sombrero de bufón | |
 | Pasadizo secreto | Se abre al acercarse la cámara | El esqueleto y su cartel | |
 | Tesoro | Cofre del rey: se abre con los tres ecos | Monedas, cofre que muerde, corona | |
-| Torre del observatorio | Telescopio: epílogo y opción de volver a explorar | Planetario, cartas celestes, Bigotes (otra vez) | |
+| Torre del observatorio | Telescopio: la vista por la lente (luna, vía láctea y tres constelaciones que se dibujan solas), el epílogo y la opción de volver a explorar | Planetario, cartas celestes, Bigotes (otra vez) | |
 
 Se puede llegar al final sin encontrar ninguna pista: el cofre explica cuántos ecos faltan y el camino sigue.
 

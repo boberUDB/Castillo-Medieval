@@ -934,6 +934,191 @@ button {
   color: var(--parch-3);
 }
 
+/* ------------------------------ telescopio ------------------------------ */
+
+.telescope {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  overflow: hidden;
+  background: #050410;
+  animation: fade-in 900ms ease-out;
+}
+
+.telescope canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.star-label {
+  position: absolute;
+  transform: translate(-50%, 0);
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--gold-3);
+  text-shadow: 0 2px 0 var(--ink);
+  opacity: 0;
+  animation: label-in 1200ms var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+@keyframes label-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* el epílogo llega cuando el cielo ya se ha dibujado */
+.telescope-text {
+  position: absolute;
+  top: 50%;
+  right: max(var(--gutter), 5vw);
+  width: min(430px, 38vw);
+  max-height: calc(100dvh - var(--gutter) * 2);
+  overflow: auto;
+  padding: 26px 30px 24px;
+  transform: translateY(-50%);
+  opacity: 0;
+  animation: epilogue-in 1400ms var(--ease-out) 5.6s forwards;
+}
+
+@keyframes epilogue-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-50% + 12px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+.telescope-text h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--red-2);
+}
+
+.telescope-text .kicker {
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--parch-3);
+}
+
+.telescope-text p {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.telescope-text .signature {
+  font-style: italic;
+  text-align: right;
+  color: var(--parch-3);
+}
+
+.telescope-text .btn:focus-visible {
+  outline-color: var(--red-2);
+}
+
+/* firma del autor en una esquina */
+.credit {
+  position: absolute;
+  left: var(--gutter);
+  bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+  margin: 0;
+  display: grid;
+  gap: 2px;
+  font-family: var(--font-title);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--gold-3);
+  text-shadow: 0 2px 0 var(--ink);
+  opacity: 0;
+  animation: label-fade 1600ms ease-out 3s forwards;
+}
+
+.credit small {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--parch-2);
+}
+
+@keyframes label-fade {
+  to {
+    opacity: 0.92;
+  }
+}
+
+@media (max-aspect-ratio: 10/11) {
+  .telescope-text {
+    top: auto;
+    right: var(--gutter);
+    left: var(--gutter);
+    bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+    width: auto;
+    max-height: 40dvh;
+    padding: 18px 20px 16px;
+    transform: none;
+    animation-name: epilogue-in-bottom;
+  }
+  @keyframes epilogue-in-bottom {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .telescope-text h2 {
+    font-size: 32px;
+  }
+  .telescope-text p {
+    font-size: 16px;
+  }
+  /* los botones quedan siempre a la vista aunque el texto tenga scroll */
+  .telescope-text .dialog-actions {
+    position: sticky;
+    bottom: -16px;
+    margin: 8px -20px -16px;
+    padding: 10px 20px 14px;
+    background: var(--parch-0);
+    box-shadow: 0 -6px 10px -6px rgba(58, 38, 22, 0.35);
+  }
+  .credit {
+    top: calc(var(--gutter) + env(safe-area-inset-top));
+    bottom: auto;
+    font-size: 22px;
+  }
+  .star-label {
+    font-size: 12px;
+  }
+}
+
+/* con movimiento reducido todo aparece de inmediato */
+.telescope[data-reduced='true'] .star-label,
+.telescope[data-reduced='true'] .telescope-text,
+.telescope[data-reduced='true'] .credit {
+  animation-delay: 0s !important;
+}
+
 /* ------------------------------ movimiento reducido ------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {

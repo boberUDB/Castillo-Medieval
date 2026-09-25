@@ -1,25 +1,13 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
-
-interface Props {
-  title: string;
-  kicker?: string;
-  onClose: () => void;
-  children: ReactNode;
-  actions?: ReactNode;
-  closeLabel?: string;
-}
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
 
 const FOCUSABLE = 'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
- * Diálogo modal de pergamino: atrapa el foco, se cierra con Escape o al pulsar
- * fuera, y devuelve el foco al elemento que lo abrió.
+ * Comportamiento de modal: atrapa el foco, cierra con Escape y devuelve el
+ * foco al elemento que lo abrió (si sigue visible).
  */
-export function Dialog({ title, kicker, onClose, children, actions, closeLabel = 'Cerrar' }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const titleId = useId();
+export function useModalFocus(ref: RefObject<HTMLElement | null>, onClose: () => void): void {
   const onCloseRef = useRef(onClose);
-
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
@@ -27,7 +15,7 @@ export function Dialog({ title, kicker, onClose, children, actions, closeLabel =
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
     const node = ref.current;
-    node?.querySelector<HTMLElement>('[data-autofocus]')?.focus();
+    node?.querySelector<HTMLElement>('[data-autofocus]')?.focus({ preventScroll: true });
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -51,10 +39,25 @@ export function Dialog({ title, kicker, onClose, children, actions, closeLabel =
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
-      // el botón que abrió el diálogo puede haberse ocultado (salió de pantalla)
       if (opener && opener.isConnected && !opener.closest('[hidden]')) opener.focus({ preventScroll: true });
     };
-  }, []);
+  }, [ref]);
+}
+
+interface Props {
+  title: string;
+  kicker?: string;
+  onClose: () => void;
+  children: ReactNode;
+  actions?: ReactNode;
+  closeLabel?: string;
+}
+
+/** Diálogo modal de pergamino. Se cierra con Escape o al pulsar fuera. */
+export function Dialog({ title, kicker, onClose, children, actions, closeLabel = 'Cerrar' }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useModalFocus(ref, onClose);
 
   return (
     <div
