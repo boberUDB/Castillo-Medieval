@@ -37,6 +37,8 @@ export interface FxState {
   hovered: string | null;
   /** Puntero en coordenadas de mundo (null si no hay puntero). */
   pointer: { x: number; y: number } | null;
+  /** Centro de la cámara en coordenadas de mundo. */
+  cam: { x: number; y: number };
   quality: 'high' | 'low';
   reduced: boolean;
 }

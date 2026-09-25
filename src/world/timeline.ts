@@ -10,8 +10,17 @@ import type { Rect, RoomId } from './types';
 export type Seg =
   | { kind: 'ext'; len: number; e0: number; e1: number; room: RoomId }
   | { kind: 'dwell'; len: number; room: RoomId; focus: Rect; from: [number, number]; to: [number, number] }
-  /** En `via`, un punto sin `y` hereda la altura de encuadre de la sala siguiente (se adapta a cada pantalla). */
-  | { kind: 'move'; len: number; via: { x: number; y?: number }[]; room?: RoomId };
+  /**
+   * Puntos de paso. `floor` encuadra como una sala apoyada en ese suelo (se
+   * adapta a cada pantalla); sin `y` ni `floor` hereda la altura de la sala siguiente.
+   */
+  | { kind: 'move'; len: number; via: Via[]; room?: RoomId };
+
+export interface Via {
+  x: number;
+  y?: number;
+  floor?: number;
+}
 
 export interface CamState {
   scene: 'ext' | 'int';
@@ -104,7 +113,10 @@ export class Timeline {
     const endCam = next ? this.dwellCam(next, 0, vw, vh) : null;
     if (startCam) pts.push(startCam);
     const fallbackY = endCam?.y ?? startCam?.y ?? 0;
-    for (const v of s.via) pts.push({ x: v.x, y: v.y ?? fallbackY });
+    for (const v of s.via) {
+      const y = v.y ?? (v.floor !== undefined ? v.floor + this.floorPad - vh / 2 : fallbackY);
+      pts.push({ x: v.x, y });
+    }
     if (endCam) pts.push(endCam);
     const lens: number[] = [];
     let total = 0;

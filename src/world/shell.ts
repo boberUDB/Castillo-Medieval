@@ -42,6 +42,17 @@ function drawEarth(ctx: Ctx, area: Rect): void {
   }
 }
 
+/** Franja de hierba entre x0 y x1 (la usan también las escaleras que pasan bajo el patio). */
+export function groundStrip(ctx: Ctx, x0: number, x1: number): void {
+  for (let x = x0; x < x1; x++) {
+    const h = 3 + Math.floor(hash(x, 1, 9) * 3);
+    rect(ctx, x, GROUND, 1, 16, '#1a1226');
+    rect(ctx, x, GROUND, 1, h, hash(x, 2, 9) > 0.5 ? P.green1 : P.green0);
+    if (hash(x, 3, 9) > 0.7) rect(ctx, x, GROUND - 1 - Math.floor(hash(x, 4, 9) * 3), 1, 2, P.green1);
+    if (hash(x, 5, 9) > 0.9) rect(ctx, x, GROUND - 2, 1, 1, P.green2);
+  }
+}
+
 /** Suelo exterior (orilla del foso y patio) con hierba. */
 function drawGroundSurface(ctx: Ctx, area: Rect): void {
   const surfaces: Rect[] = [
@@ -52,15 +63,7 @@ function drawGroundSurface(ctx: Ctx, area: Rect): void {
   ];
   for (const s of surfaces) {
     if (!overlaps(s, area)) continue;
-    const x0 = Math.max(s.x, area.x);
-    const x1 = Math.min(s.x + s.w, area.x + area.w);
-    for (let x = x0; x < x1; x++) {
-      const h = 3 + Math.floor(hash(x, 1, 9) * 3);
-      rect(ctx, x, GROUND, 1, 16, '#1a1226');
-      rect(ctx, x, GROUND, 1, h, hash(x, 2, 9) > 0.5 ? P.green1 : P.green0);
-      if (hash(x, 3, 9) > 0.7) rect(ctx, x, GROUND - 1 - Math.floor(hash(x, 4, 9) * 3), 1, 2, P.green1);
-      if (hash(x, 5, 9) > 0.9) rect(ctx, x, GROUND - 2, 1, 1, P.green2);
-    }
+    groundStrip(ctx, Math.max(s.x, area.x), Math.min(s.x + s.w, area.x + area.w));
   }
 }
 

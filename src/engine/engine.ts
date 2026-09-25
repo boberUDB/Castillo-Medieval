@@ -193,6 +193,7 @@ export class Engine {
       flag: this.opts.flag,
       hovered: this.hovered,
       pointer,
+      cam: { x: cam.cx, y: cam.cy },
       quality: this.quality,
       reduced: this.reduced,
     };

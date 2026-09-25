@@ -2,7 +2,7 @@ import { P } from '../../engine/palette';
 import { ashlar, bayer, disc, hash, line, px, rect, type Ctx } from '../../engine/pixel';
 import type { Light } from '../../engine/lighting';
 import { SPACE } from '../layout';
-import { SECTION } from '../shell';
+import { SECTION, groundStrip } from '../shell';
 import type { FxState, SpaceDef } from '../types';
 import {
   archWindow,
@@ -359,6 +359,7 @@ export const stair1: SpaceDef = {
       rect(ctx, x, y - 8, 1, 8, P.stone4);
     }
     rect(ctx, 1216, 607, 32, 1, P.stone5);
+    groundStrip(ctx, 1088, 1248); // hierba del patio sobre el pasaje
     torchBracket(ctx, 1128, 478);
     torchBracket(ctx, 1196, 546);
   },

@@ -61,7 +61,7 @@ export const OPENINGS: Rect[] = [
   r(2816, 112, 16, 64), // trono → pasadizo
   r(2880, 552, 16, 56), // pasadizo → tesoro
   r(3200, 552, 16, 56), // tesoro → torre
-  r(3232, -416, 64, 16), // torre → observatorio
+  r(3284, -416, 24, 16), // torre → observatorio
 ];
 
 /** Foso frente al portón. */

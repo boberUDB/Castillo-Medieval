@@ -537,7 +537,14 @@ button {
     font-size: 26px;
   }
   .caption-body {
+    padding: 12px 14px 14px;
     font-size: 16px;
+  }
+  .caption-actions .btn {
+    flex: 1 1 0;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 14px;
   }
 }
 
@@ -575,12 +582,11 @@ button {
   }
 }
 
+/* procedencia del texto ("Placa del pedestal"): nota al margen, no etiqueta */
 .dialog .kicker {
-  margin: 0 0 4px;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-style: italic;
   color: var(--parch-3);
 }
 
@@ -666,15 +672,109 @@ button {
   opacity: 0.55;
 }
 
+/* ------------------------------ caldero ------------------------------ */
+
+.ingredients {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 12px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.ingredient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--parch-ink);
+  background: rgba(122, 96, 56, 0.12);
+  box-shadow: inset 0 0 0 2px rgba(122, 96, 56, 0.35);
+  transition: background 120ms, box-shadow 120ms, transform 120ms;
+}
+
+.ingredient:hover {
+  background: rgba(122, 96, 56, 0.22);
+}
+
+.ingredient:active {
+  transform: translateY(1px);
+}
+
+.ingredient[aria-pressed='true'] {
+  background: rgba(138, 37, 57, 0.16);
+  box-shadow: inset 0 0 0 3px var(--red-2);
+}
+
+.ingredient:focus-visible {
+  outline: 2px dashed var(--red-2);
+  outline-offset: 2px;
+}
+
+.ingredient strong {
+  display: block;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.ingredient small {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--parch-3);
+}
+
+/* tarro de pixel art: vidrio, tapa y contenido del color del ingrediente */
+.jar {
+  flex: none;
+  width: 18px;
+  height: 24px;
+  background:
+    linear-gradient(var(--jar), var(--jar)) 3px 9px / 12px 12px no-repeat,
+    linear-gradient(#5c3822, #5c3822) 2px 0 / 14px 5px no-repeat,
+    #c9fff4;
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.dialog .brew-status {
+  min-height: 1.5em;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--parch-3);
+}
+
+.speech strong {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--red-2);
+}
+
+.caption-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 /* ------------------------------ inventario ------------------------------ */
 
 .inv-section h3 {
   margin: 8px 0 10px;
-  font-family: var(--font-ui);
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--parch-3);
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--parch-ink);
 }
 
 .inv-grid {
@@ -782,9 +882,10 @@ button {
 
 .toast strong {
   display: block;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1;
   color: var(--gold-3);
 }
 

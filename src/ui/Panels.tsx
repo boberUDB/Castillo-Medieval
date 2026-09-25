@@ -1,4 +1,5 @@
-import { CLUES, CLUE_ORDER, ROOMS, SECRETS, SECRET_ORDER } from '../content/texts';
+import { useState, type CSSProperties } from 'react';
+import { CLUES, CLUE_ORDER, INGREDIENTS, ROOMS, SECRETS, SECRET_ORDER } from '../content/texts';
 import type { SaveData } from '../state/store';
 import type { RoomId } from '../world/types';
 import { CastlePlan } from './CastlePlan';
@@ -90,6 +91,57 @@ export function MapDialog({
           );
         })}
       </ul>
+    </Dialog>
+  );
+}
+
+const INGREDIENT_COLOR: Record<string, string> = {
+  estrella: '#e8c565',
+  mandragora: '#7a4c2c',
+  triton: '#4e9148',
+  dragon: '#b43b45',
+  seta: '#68ddd3',
+};
+
+/** Mesa del alquimista: se eligen dos ingredientes y se echan al caldero. */
+export function BrewDialog({ onBrew, onClose }: { onBrew: (a: string, b: string) => void; onClose: () => void }) {
+  const [picked, setPicked] = useState<string[]>([]);
+  const toggle = (id: string) =>
+    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= 2 ? [p[1], id] : [...p, id]));
+  return (
+    <Dialog
+      title="El caldero"
+      kicker="Sala de alquimia"
+      closeLabel="Mejor no"
+      onClose={onClose}
+      actions={
+        <button type="button" className="btn" disabled={picked.length < 2} onClick={() => onBrew(picked[0], picked[1])}>
+          Echar al caldero
+        </button>
+      }
+    >
+      <p>Elige dos ingredientes de la mesa. El caldero no acepta devoluciones.</p>
+      <ul className="ingredients" aria-label="Ingredientes">
+        {INGREDIENTS.map((ing) => {
+          const on = picked.includes(ing.id);
+          return (
+            <li key={ing.id}>
+              <button type="button" className="ingredient" aria-pressed={on} onClick={() => toggle(ing.id)}>
+                <span className="jar" style={{ '--jar': INGREDIENT_COLOR[ing.id] } as CSSProperties} aria-hidden="true" />
+                <span>
+                  <strong>{ing.name}</strong>
+                  <small>{ing.hint}</small>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="brew-status" aria-live="polite">
+        {picked.length === 0 && 'Aún no has elegido nada.'}
+        {picked.length === 1 && `${INGREDIENTS.find((i) => i.id === picked[0])?.name}… y falta otro.`}
+        {picked.length === 2 && `${picked.map((id) => INGREDIENTS.find((i) => i.id === id)?.name).join(' y ')}. ¿Seguro?`}
+      </p>
     </Dialog>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ROOMS } from '../content/texts';
 import type { RoomId } from '../world/types';
 
@@ -7,7 +7,7 @@ import type { RoomId } from '../world/types';
  * mientras se lee. Tras unos segundos se pliega al nombre para despejar la escena;
  * se puede volver a desplegar.
  */
-export function Caption({ room, visible }: { room: RoomId; visible: boolean }) {
+export function Caption({ room, visible, actions }: { room: RoomId; visible: boolean; actions?: ReactNode }) {
   const [open, setOpen] = useState(true);
   const [shownRoom, setShownRoom] = useState(room);
 
@@ -17,11 +17,12 @@ export function Caption({ room, visible }: { room: RoomId; visible: boolean }) {
     setOpen(true);
   }
 
+  const hasActions = Boolean(actions);
   useEffect(() => {
-    if (!visible || !open) return;
+    if (!visible || !open || hasActions) return;
     const id = window.setTimeout(() => setOpen(false), 9000);
     return () => window.clearTimeout(id);
-  }, [visible, open, room]);
+  }, [visible, open, room, hasActions]);
 
   const data = ROOMS[room];
   if (room === 'exterior' || !data.line) return null;
@@ -37,6 +38,7 @@ export function Caption({ room, visible }: { room: RoomId; visible: boolean }) {
       {open && (
         <div className="caption-body parchment">
           <p>{data.line}</p>
+          {actions && <div className="caption-actions">{actions}</div>}
         </div>
       )}
     </section>

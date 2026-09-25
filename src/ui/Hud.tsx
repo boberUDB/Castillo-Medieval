@@ -46,7 +46,8 @@ export function Hud(p: Props) {
 
   return (
     <nav className="hud" aria-label="Controles del castillo">
-      <button type="button" className="minimap plaque" onClick={p.onMap} aria-label="Abrir el mapa del castillo">
+      {/* atajo visual para ratón; el botón "Mapa" es el control accesible (sin duplicados para teclado) */}
+      <button type="button" className="minimap plaque" onClick={p.onMap} tabIndex={-1} aria-hidden="true">
         <CastlePlan current={p.room} visited={p.visited} pulse={!p.reduced} />
       </button>
       <button type="button" className="hud-btn plaque" onClick={p.onMap} aria-label="Mapa">

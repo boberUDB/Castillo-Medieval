@@ -3,7 +3,7 @@ import type { HotspotDef } from '../world/types';
 
 interface Props {
   defs: HotspotDef[];
-  speech: { id: string; text: string; key: number } | null;
+  speech: { id: string; text: string; key: number; title?: string } | null;
   register: (id: string, el: HTMLElement | null) => void;
   onActivate: (id: string) => void;
   onHover: (id: string | null) => void;
@@ -36,6 +36,7 @@ export const Hotspots = memo(function Hotspots({ defs, speech, register, onActiv
           )}
           {speech?.id === d.id && (
             <p key={speech.key} className="speech" aria-hidden="true">
+              {speech.title && <strong>{speech.title}</strong>}
               {speech.text}
             </p>
           )}
