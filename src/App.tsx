@@ -102,12 +102,12 @@ export default function App() {
     hotspotEls.current.forEach((el, id) => engine.registerHotspot(id, el));
     engineRef.current = engine;
     engine.start();
-    if (import.meta.env.DEV) (window as unknown as { __engine: Engine }).__engine = engine;
+    if (import.meta.env.DEV) Object.assign(window, { __engine: engine, __audio: audio });
     return () => {
       engine.destroy();
       engineRef.current = null;
     };
-  }, []);
+  }, [audio]);
 
   useEffect(() => () => audio.disable(), [audio]);
 

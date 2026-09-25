@@ -78,7 +78,7 @@ src/
 - **Accesibilidad.** Cada objeto interactivo es un `<button>` real colocado sobre el lienzo, que se oculta cuando sale de cuadro. Los diálogos atrapan el foco, se cierran con Escape y devuelven el foco. El texto de cada sala está en HTML con `aria-live`. Hay un enlace para saltar al contenido.
 - **Movimiento reducido.** Respeta `prefers-reduced-motion`, y además se puede activar a mano en Ajustes. Da un recorrido alternativo más corto: sin zoom de entrada, sin inercia, con cortes suaves entre salas y la cámara pegada al scroll.
 - **Rendimiento adaptativo.** Si durante unos dos segundos no se sostienen 40 fps, la calidad baja sola: píxeles más grandes y sin brillo aditivo. También se puede elegir en Ajustes.
-- **Sonido.** Ambiente sintetizado con Web Audio (viento, fuego y un acorde por sala), sin archivos externos. Está apagado al empezar y tiene un botón visible.
+- **Música.** Música generativa sintetizada con Web Audio, sin archivos externos; está apagada al empezar y tiene un botón visible. Una caja de música toca por fragmentos el tema del rey (re menor, lento como una nana). Cada nota vuelve en ecos, a través de un delay con realimentación, dentro de una reverb de sala de piedra, y entre frase y frase hay silencios largos. Debajo suena un bordón grave que respira, y muy de vez en cuando se oye una campana lejana, un crujido o un acorde que se desafina. Cada sala cambia la mezcla: coro fantasmal en el trono, el tema entero en el tesoro, registro agudo en el observatorio. El cofre, al abrirse, toca la melodía completa.
 
 ## Recursos y licencias
 
