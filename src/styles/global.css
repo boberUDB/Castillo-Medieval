@@ -1,0 +1,854 @@
+/* Tokens: la misma paleta que el arte (src/engine/palette.ts). */
+:root {
+  color-scheme: dark;
+  --ink: #0a0816;
+  --night-0: #07061a;
+  --night-1: #0d0b26;
+  --night-2: #151238;
+  --stone-0: #131326;
+  --stone-1: #1b1c35;
+  --stone-2: #252845;
+  --stone-3: #313656;
+  --stone-4: #3f4769;
+  --stone-5: #525d82;
+  --stone-6: #6b789e;
+  --stone-7: #8b98bb;
+  --violet-1: #1f1538;
+  --violet-2: #2e1f4d;
+  --parch-0: #f0e2b8;
+  --parch-1: #d9c08e;
+  --parch-2: #b3945f;
+  --parch-3: #7a6038;
+  --parch-ink: #3a2616;
+  --gold-1: #8c6423;
+  --gold-2: #c29337;
+  --gold-3: #e8c565;
+  --gold-4: #fff0a6;
+  --fire-1: #ffd66b;
+  --fire-2: #ffa53d;
+  --red-1: #5e1a2d;
+  --red-2: #8a2539;
+  --teal-3: #68ddd3;
+
+  --font-title: 'Jacquarda Bastarda 9', 'Pixelify Sans', serif;
+  --font-ui: 'Pixelify Sans', system-ui, sans-serif;
+  --font-body: 'Alegreya', Georgia, serif;
+
+  /* Un "píxel" de interfaz: bordes y esquinas escalonadas usan múltiplos de este valor. */
+  --px: 3px;
+  --gutter: 16px;
+  --hud-size: 48px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 900px) {
+  :root {
+    --px: 4px;
+    --gutter: 24px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--night-0);
+  color: var(--parch-0);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 20;
+  padding: 10px 14px;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: var(--gold-3);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+  outline: 2px dashed var(--ink);
+  outline-offset: -5px;
+}
+
+.lvh-probe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100vh;
+  height: 100lvh;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ------------------------------ escenario ------------------------------ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.stage canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.track {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hotspots {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hotspot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.hotspot > button {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot > button:focus-visible {
+  outline: 2px dashed var(--gold-3);
+  outline-offset: 2px;
+}
+
+.hotspot-label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--gold-4);
+  background: var(--ink);
+  padding: 3px 8px;
+  box-shadow: 0 0 0 2px var(--gold-1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms;
+}
+
+.hotspot > button:hover + .hotspot-label,
+.hotspot > button:focus-visible + .hotspot-label {
+  opacity: 1;
+}
+
+/* mientras el objeto "habla", su etiqueta se aparta */
+.hotspot:has(.speech) .hotspot-label {
+  opacity: 0 !important;
+}
+
+@media (hover: none) {
+  .hotspot-label {
+    display: none;
+  }
+}
+
+.speech {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  width: max-content;
+  max-width: min(280px, 70vw);
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--parch-ink);
+  background: var(--parch-0);
+  box-shadow:
+    0 0 0 var(--px) var(--parch-3),
+    0 0 0 calc(var(--px) * 2) var(--ink);
+  pointer-events: none;
+  animation: speech-in 220ms var(--ease-out);
+}
+
+.speech::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 6px);
+  top: 100%;
+  border: 6px solid transparent;
+  border-top-color: var(--parch-3);
+}
+
+@keyframes speech-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+/* ------------------------------ paneles ------------------------------ */
+
+/* Pergamino con esquinas escalonadas (pixel art) y borde de tinta. */
+.parchment {
+  position: relative;
+  color: var(--parch-ink);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.18), transparent 60%),
+    var(--parch-0);
+  clip-path: polygon(
+    var(--px) 0, calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%,
+    var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)), 0 var(--px), var(--px) var(--px)
+  );
+  box-shadow:
+    inset 0 0 0 var(--px) var(--parch-3),
+    inset 0 0 0 calc(var(--px) * 2) var(--parch-1);
+}
+
+.plaque {
+  position: relative;
+  color: var(--parch-0);
+  background: linear-gradient(var(--stone-3), var(--stone-2));
+  clip-path: polygon(
+    var(--px) 0, calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%,
+    var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)), 0 var(--px), var(--px) var(--px)
+  );
+  box-shadow:
+    inset 0 0 0 var(--px) var(--stone-0),
+    inset 0 var(--px) 0 calc(var(--px) * 2) var(--stone-5);
+}
+
+/* ------------------------------ título ------------------------------ */
+
+.title {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 3;
+  padding: clamp(20px, 6vh, 64px) var(--gutter) 0;
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 500ms var(--ease-out), transform 700ms var(--ease-out);
+}
+
+.title[data-hidden='true'] {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+.title h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: clamp(40px, 11vw, 99px);
+  text-wrap: balance;
+  line-height: 0.9;
+  color: var(--gold-3);
+  text-shadow:
+    0 var(--px) 0 var(--gold-1),
+    0 calc(var(--px) * 2) 0 var(--ink),
+    0 0 36px rgba(255, 165, 61, 0.28);
+}
+
+.title p {
+  margin: 14px auto 0;
+  max-width: 34ch;
+  font-size: clamp(17px, 2vw, 21px);
+  line-height: 1.4;
+  color: var(--parch-1);
+  text-shadow: 0 2px 0 var(--ink);
+}
+
+.scroll-cue {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 3;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parch-1);
+  text-shadow: 0 2px 0 var(--ink);
+  pointer-events: none;
+  transition: opacity 400ms;
+}
+
+.scroll-cue[data-hidden='true'] {
+  opacity: 0;
+}
+
+.scroll-cue svg {
+  animation: cue 1.6s steps(4) infinite;
+}
+
+@keyframes cue {
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+/* ------------------------------ cartela de sala ------------------------------ */
+
+.caption {
+  position: fixed;
+  z-index: 3;
+  left: var(--gutter);
+  bottom: var(--gutter);
+  width: min(400px, calc(100vw - var(--gutter) * 2));
+  transition: opacity 380ms var(--ease-out), transform 480ms var(--ease-out);
+}
+
+.caption[data-hidden='true'] {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.caption-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 10px 9px 16px;
+}
+
+.caption-head h2 {
+  margin: 0;
+  flex: 1;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--gold-3);
+  text-shadow: 0 2px 0 var(--ink);
+}
+
+.caption-head .chev {
+  min-width: 44px;
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--parch-1);
+  background: var(--stone-1);
+  box-shadow: inset 0 0 0 2px var(--stone-0);
+}
+
+.caption-head .chev:hover {
+  color: var(--gold-4);
+}
+
+.caption-head .chev:focus-visible {
+  outline: 2px dashed var(--gold-3);
+  outline-offset: 2px;
+}
+
+.caption-body {
+  margin-top: 6px;
+  padding: 14px 18px 16px;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.caption-body p {
+  margin: 0;
+}
+
+/* ------------------------------ HUD ------------------------------ */
+
+.hud {
+  position: fixed;
+  z-index: 4;
+  top: var(--gutter);
+  right: var(--gutter);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hud-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--hud-size);
+  height: var(--hud-size);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  color: var(--parch-0);
+  transition: transform 120ms;
+}
+
+.hud-btn:hover {
+  transform: translateY(-2px);
+}
+
+.hud-btn:active {
+  transform: translateY(1px);
+}
+
+.hud-btn:focus-visible {
+  outline: 2px dashed var(--gold-3);
+  outline-offset: 3px;
+}
+
+.hud-btn[aria-pressed='true'] {
+  background: linear-gradient(var(--stone-4), var(--stone-3));
+}
+
+.hud-btn .badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 20px;
+  padding: 1px 4px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink);
+  background: var(--gold-3);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.hud-tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 3px 8px;
+  color: var(--gold-4);
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--gold-1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms;
+}
+
+.hud-btn:hover .hud-tip,
+.hud-btn:focus-visible .hud-tip {
+  opacity: 1;
+}
+
+/* Minimapa */
+.minimap {
+  display: block;
+  width: 188px;
+  height: var(--hud-size);
+  padding: 6px 8px;
+  border: 0;
+  cursor: pointer;
+}
+
+.minimap svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.minimap:focus-visible {
+  outline: 2px dashed var(--gold-3);
+  outline-offset: 3px;
+}
+
+@media (max-width: 719px) {
+  .minimap {
+    display: none;
+  }
+  .title {
+    padding-top: calc(var(--gutter) + var(--hud-size) + 14px);
+  }
+  .title p {
+    font-size: 16px;
+  }
+  :root {
+    --hud-size: 44px;
+  }
+  .caption {
+    bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+  }
+  .caption-head h2 {
+    font-size: 26px;
+  }
+  .caption-body {
+    font-size: 16px;
+  }
+}
+
+/* ------------------------------ diálogos ------------------------------ */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: rgba(7, 6, 26, 0.72);
+  animation: fade-in 200ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.dialog {
+  width: min(540px, 100%);
+  max-height: calc(100dvh - var(--gutter) * 2);
+  overflow: auto;
+  padding: 28px 32px 26px;
+  animation: dialog-in 320ms var(--ease-out);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+.dialog .kicker {
+  margin: 0 0 4px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parch-3);
+}
+
+.dialog h2 {
+  margin: 0 0 14px;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--red-2);
+}
+
+.dialog p {
+  margin: 0 0 12px;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.dialog .signature {
+  font-style: italic;
+  text-align: right;
+  color: var(--parch-3);
+}
+
+.reward {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 4px;
+  padding: 10px 14px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  color: var(--parch-0);
+  background: var(--red-1);
+  box-shadow: inset 0 0 0 2px var(--gold-2);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  color: var(--parch-0);
+  background: var(--stone-3);
+  box-shadow:
+    inset 0 calc(var(--px) * -1) 0 var(--stone-1),
+    inset 0 0 0 2px var(--stone-0);
+  transition: transform 120ms, background 120ms;
+}
+
+.btn:hover {
+  background: var(--stone-4);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: 2px dashed var(--red-2);
+  outline-offset: 3px;
+}
+
+.btn.primary {
+  background: var(--red-2);
+  box-shadow:
+    inset 0 calc(var(--px) * -1) 0 var(--red-1),
+    inset 0 0 0 2px var(--ink);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ------------------------------ inventario ------------------------------ */
+
+.inv-section h3 {
+  margin: 8px 0 10px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parch-3);
+}
+
+.inv-grid {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.inv-item {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(122, 96, 56, 0.12);
+  box-shadow: inset 0 0 0 2px rgba(122, 96, 56, 0.35);
+}
+
+.inv-item[data-found='false'] {
+  opacity: 0.6;
+}
+
+.inv-item strong {
+  display: block;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.inv-item span {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.slot {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--stone-2);
+  box-shadow: inset 0 0 0 2px var(--stone-0), inset 0 3px 0 2px var(--stone-4);
+}
+
+/* ------------------------------ mapa ------------------------------ */
+
+.map-wrap {
+  position: relative;
+  margin: 6px 0 12px;
+  padding: 12px;
+}
+
+.dialog .map-note {
+  font-size: 16px;
+}
+
+.map-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-list .btn {
+  width: 100%;
+  text-align: left;
+  font-size: 15px;
+}
+
+.map-list .btn[aria-current='true'] {
+  background: var(--red-2);
+}
+
+/* ------------------------------ avisos ------------------------------ */
+
+.toasts {
+  position: fixed;
+  z-index: 6;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 10px 12px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  animation: toast-in 360ms var(--ease-out);
+}
+
+.toast strong {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-3);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (max-width: 719px) {
+  .toasts {
+    top: calc(var(--gutter) + var(--hud-size) + 10px);
+    bottom: auto;
+  }
+}
+
+/* ------------------------------ ajustes ------------------------------ */
+
+.hud-menu-wrap {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 260px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.menu .btn {
+  width: 100%;
+  text-align: left;
+  font-size: 15px;
+}
+
+.menu-title {
+  margin: 0 0 2px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parch-3);
+}
+
+/* ------------------------------ movimiento reducido ------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+:root[data-reduced='true'] *,
+:root[data-reduced='true'] *::before,
+:root[data-reduced='true'] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
